@@ -16,11 +16,17 @@ func HandleHome(writer http.ResponseWriter, request *http.Request) {
 
 func PostRequest(writer http.ResponseWriter, request *http.Request) {
 	decoder := json.NewDecoder(request.Body)
-	var metadata Metadata
-	err := decoder.Decode(&metadata)
+	var user User
+	err := decoder.Decode(&user)
 	if err != nil {
 		fmt.Fprintf(writer, "error: %v", err)
 		return
 	}
-	fmt.Fprintf(writer, "Payload %v\n", metadata)
+	response, err := user.ToJson()
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write(response)
 }
